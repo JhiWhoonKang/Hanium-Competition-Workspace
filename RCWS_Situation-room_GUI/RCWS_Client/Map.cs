@@ -14,12 +14,20 @@ namespace RCWS_Client
     public partial class Map : Form
     {
         private Bitmap mapImage;
+        private Bitmap arrow;
         private float currentScale = 1.0f;
         private float zoomFactor = 1.1f;
         private bool isDragging = false;
+        private bool LButton = false;
         private int lastX;
         private int lastY;
-        
+
+        /*
+        private List<Bitmap> mapOverlays;
+        private List<Point> mapOverlayLocations;
+        private Bitmap currentOverlay;
+        */
+
         public Map()
         {
             InitializeComponent();
@@ -32,6 +40,12 @@ namespace RCWS_Client
             pictureBox_Map.MouseDown += MapPictureBox_MouseDown;
             pictureBox_Map.MouseMove += MapPictureBox_MouseMove;
             pictureBox_Map.MouseUp += MapPictureBox_MouseUp;
+
+            /*
+            mapOverlays = new List<Bitmap>();
+            mapOverlayLocations = new List<Point>();
+            currentOverlay = null;
+            */
         }
         
 
@@ -45,6 +59,15 @@ namespace RCWS_Client
             {
                 g.InterpolationMode = InterpolationMode.HighQualityBicubic;
                 g.DrawImage(mapImage, new Rectangle(0, 0, newWidth, newHeight));
+
+                /*
+                for (int i = 0; i < mapOverlays.Count; i++)
+                {
+                    var overlay = mapOverlays[i];
+                    var location = mapOverlayLocations[i];
+                    g.DrawImage(overlay, new Rectangle(location.X, location.Y, overlay.Width, overlay.Height));
+                }
+                */
             }
 
             pictureBox_Map.Image = resizedImage;
@@ -67,6 +90,11 @@ namespace RCWS_Client
                 isDragging = true;
                 lastX = e.X;
                 lastY = e.Y;
+            }
+
+            if (e.Button == MouseButtons.Right)
+            {
+                LButton = true;
             }
         }
 
@@ -100,6 +128,30 @@ namespace RCWS_Client
             {
                 isDragging = false;
             }
+
+            /*
+            if (e.Button == MouseButtons.Right)
+            {
+                if (currentOverlay != null)
+                {
+                    mapOverlays.Add(currentOverlay);
+                    mapOverlayLocations.Add(e.Location);
+                    UpdateMapImage();
+                }
+            }
+            */
         }
+
+        /*
+        private void noEnemyMovementToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            currentOverlay = new Bitmap(@"C:\JHIWHOON_ws\2023 Hanium\file photo\Arrow.bmp");
+        }
+
+        private void enemyContinuouslyMovingToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            currentOverlay = new Bitmap(@"C:\JHIWHOON_ws\2023 Hanium\file photo\Arrow.bmp");
+        }
+        */
     }
 }

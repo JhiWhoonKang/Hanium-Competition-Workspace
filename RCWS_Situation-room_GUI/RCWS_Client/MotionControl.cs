@@ -70,49 +70,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-//namespace RCWS_Client
-//{
-//    public partial class MotionControl : Form
-//    {
-//        private StreamWriter _streamWriter;
-//        private HashSet<Keys> _pressedKeys = new HashSet<Keys>();
-
-//        public MotionControl(StreamWriter streamWriter)
-//        {
-//            InitializeComponent();
-//            this._streamWriter = streamWriter;
-//            this.KeyDown += new KeyEventHandler(MotionControl_KeyDown);
-//            this.KeyUp += new KeyEventHandler(MotionControl_KeyUp);
-//        }
-
-//        private async void MotionControl_KeyDown(object sender, KeyEventArgs e)
-//        {
-//            _pressedKeys.Add(e.KeyCode);
-
-//            char horizontalDirection = (_pressedKeys.Contains(Keys.A) ? 'L' : (_pressedKeys.Contains(Keys.D) ? 'R' : '\0'));
-//            char verticalDirection = (_pressedKeys.Contains(Keys.W) ? 'U' : (_pressedKeys.Contains(Keys.S) ? 'D' : '\0'));
-
-//            if (horizontalDirection != '\0')
-//                await SendDirectionAsync(horizontalDirection);
-
-//            if (verticalDirection != '\0')
-//                await SendDirectionAsync(verticalDirection);
-//        }
-
-//        private void MotionControl_KeyUp(object sender, KeyEventArgs e)
-//        {
-//            _pressedKeys.Remove(e.KeyCode);
-//        }
-
-//        private async Task SendDirectionAsync(char direction)
-//        {
-//            await _streamWriter.WriteAsync(direction + "\n");
-//            _streamWriter.Flush();
-//        }
-//    }
-//}
-
-
 namespace RCWS_Client
 {
     public partial class MotionControl : Form
@@ -131,13 +88,13 @@ namespace RCWS_Client
         private async void MotionControl_KeyDown(object sender, KeyEventArgs e)
         {
             _pressedKeys.Add(e.KeyCode);
-            await SendDirectionPacketAsync();
+            await SendInform();
         }
 
         private async void MotionControl_KeyUp(object sender, KeyEventArgs e)
         {
             _pressedKeys.Remove(e.KeyCode);
-            await SendDirectionPacketAsync();
+            await SendInform();
         }
 
         /*
@@ -153,7 +110,7 @@ namespace RCWS_Client
         명령권    | 16 0001 xxxx
          *
          */
-        private async Task SendDirectionPacketAsync()
+        private async Task SendInform()
         {
             byte packet = 0;
 

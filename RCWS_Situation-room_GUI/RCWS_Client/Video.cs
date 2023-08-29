@@ -1,107 +1,138 @@
 ﻿//using System;
 //using System.Collections.Generic;
-//using System.ComponentModel;
-//using System.Data;
 //using System.Drawing;
-//using System.Linq;
-//using System.Net.Sockets;
 //using System.Net;
-//using System.Text;
+//using System.Net.Sockets;
 //using System.Threading;
-//using System.Threading.Tasks;
 //using System.Windows.Forms;
 //using OpenCvSharp;
-//using System.IO;
+//using System.Linq;
+//using System.Text;
 
 //namespace RCWS_Client
 //{
 //    public partial class Video : Form
 //    {
-//        private const int Width = 1080;
-//        private const int Height = 720;
-//        private const int Port = 5001;
-//        private const string ServerIP = "127.0.0.1";
+//        private const int Port = define.UDPPORT;
+//        private const string ServerIP = define.SERVER_IP;
 
 //        private UdpClient _udpClient;
-//        private IPEndPoint _endPoint;
-//        private CancellationTokenSource _cancellationTokenSource;
-//        private VideoCapture _capture;
+//        private IPEndPoint _remoteEndPoint;
 
-//        public Video()
+//        public Video(UdpClient udpClient, IPEndPoint endPoint)
 //        {
 //            InitializeComponent();
 
-//            _udpClient = new UdpClient(Port);
-//            _endPoint = new IPEndPoint(IPAddress.Parse(ServerIP), Port);
-//            _cancellationTokenSource = new CancellationTokenSource();
-//            _capture = new VideoCapture(0);
+//            _udpClient = udpClient;
+//            _remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
 
-//            if (!_capture.IsOpened())
-//            {
-//                MessageBox.Show("Camera Open failed");
-//                Application.Exit();
-//            }
-//            else
-//            {
-//                MessageBox.Show("Camera Open Success");
-//            }
+//            pictureBox_Display.SizeMode = PictureBoxSizeMode.StretchImage;
 
-//            Thread.Sleep(2000);
-
-//            string clientIP = "clientIP";
-
-//            UdpClient udpClient = new UdpClient(clientIP, Port);
-//            Thread captureThread = new Thread(() => CaptureAndSend(udpClient, _capture));
-//            captureThread.Start();
-//            //captureThread.Join();
+//            // 영상 수신 및 디코딩 스레드  
+//            Thread receiveAndDisplayThread = new Thread(ReceiveAndDisplay);
+//            receiveAndDisplayThread.IsBackground = true;
+//            receiveAndDisplayThread.Start();
 //        }
 
-//        private static void CaptureAndSend(UdpClient udpClient, VideoCapture Capture)
+//        //private void ReceiveAndDisplay()
+//        //{
+//        //    while (true)
+//        //    {
+//        //        try
+//        //        {
+//        //            Dictionary<int, byte[]> imageParts = new Dictionary<int, byte[]>();
+//        //            int partsReceived = 0;
+
+//        //            /* 4등분해서 들어오는 buffer data 받기 */
+//        //            while (partsReceived < 4)
+//        //            {
+//        //                byte[] imageData = _udpClient.Receive(ref _remoteEndPoint);
+
+//        //                int partIndex = imageData[0] - 0x30;
+//        //                byte[] partData = imageData.Skip(1).ToArray();
+
+//        //                if (!imageParts.ContainsKey(partIndex))
+//        //                {
+//        //                    imageParts[partIndex] = partData;
+//        //                    partsReceived++;
+//        //                }
+
+//        //                byte ack = (byte)(partIndex + 0x30);
+//        //                _udpClient.Send(new byte[] { ack }, 1, _remoteEndPoint);
+//        //            }
+
+//        //            int totalBytes = imageParts.Sum(part => part.Value.Length);
+//        //            byte[] mergedImageData = new byte[totalBytes];
+//        //            int offset = 0;
+
+//        //            for (int i = 0; i < imageParts.Count; i++)
+//        //            {
+//        //                byte[] part = imageParts[i];
+//        //                Buffer.BlockCopy(part, 0, mergedImageData, offset, part.Length);
+//        //                offset += part.Length;
+//        //            }
+
+//        //            Mat rawData = new Mat(1, mergedImageData.Length, MatType.CV_8UC3, mergedImageData);
+//        //            var image = Cv2.ImDecode(rawData, ImreadModes.Color);
+//        //            pictureBox_Display.Image = OpenCvSharp.Extensions.BitmapConverter.ToBitmap(image);
+//        //        }
+//        //        catch (Exception ex)
+//        //        {
+//        //            Console.WriteLine("Server Error: " + ex.Message);
+//        //        }
+//        //    }
+//        //}
+
+//        public Mat ReceiveAndDisplay()
 //        {
-//            Console.WriteLine("Client start");
+//            const int SendBufSize = 40960;
+//            const int SplitImg = 4;
+//            const int BufSize = SendBufSize * SplitImg;
 
-//            while (true)
+//            Dictionary<int, byte[]> imageParts = new Dictionary<int, byte[]>();
+//            int partsReceived = 0;
+
+//            while (partsReceived < SplitImg)
 //            {
-//                try
+//                byte[] receiveData = _udpClient.Receive(ref _remoteEndPoint);
+
+//                int partIndex = receiveData[0] - 0x30;
+//                byte[] partData = receiveData.Skip(1).ToArray();
+
+//                if (!imageParts.ContainsKey(partIndex))
 //                {
-//                    using (var image = new Mat())
-//                    {
-//                        Capture.Read(image);
-//                        if (image.Empty()) continue;
-//                        var imageData = ConvertImageToByteArray(image);
+//                    imageParts[partIndex] = partData;
+//                    partsReceived++;
 
-//                        if (imageData != null)
-//                        {
-//                            udpClient.Send(imageData, imageData.Length);
-
-//                            IPEndPoint serverEndPoint = new IPEndPoint(IPAddress.Any, 0);
-//                            byte[] ackBuffer = udpClient.Receive(ref serverEndPoint);
-//                            string ackMessage = Encoding.ASCII.GetString(ackBuffer, 0, ackBuffer.Length);
-//                            if (ackMessage != "ACK") throw new InvalidDataException("ACK message not received");
-//                        }
-//                    }
-//                }
-
-//                catch (Exception ex)
-//                {
-//                    Console.WriteLine(ex.Message);
+//                    byte[] ack = Encoding.ASCII.GetBytes(((char)(partIndex + 0x30)).ToString());
+//                    _udpClient.Send(ack, ack.Length, _remoteEndPoint);
 //                }
 //            }
+
+//            int totalBytes = imageParts.Sum(part => part.Value.Length);
+//            byte[] mergedImageData = new byte[totalBytes];
+//            int offset = 0;
+
+//            for (int i = 0; i < imageParts.Count; i++)
+//            {
+//                byte[] part = imageParts[i];
+//                Buffer.BlockCopy(part, 0, mergedImageData, offset, part.Length);
+//                offset += part.Length;
+//            }
+
+//            Mat image = Cv2.ImDecode(mergedImageData, ImreadModes.Color);
+//            if (image == null || image.Empty())
+//            {
+//                Console.WriteLine("Invalid image data received or wrong image format.");
+//                return null; //  또는 적절한 대체 이미지를 반환합니다.
+//            }
+//            return image;
 //        }
 
-//        private static byte[] ConvertImageToByteArray(Mat Image)
-//        {
-//            using (var ms = new System.IO.MemoryStream())
-//            {
-//                using (var bitmap = OpenCvSharp.Extensions.BitmapConverter.ToBitmap(Image))
-//                {
-//                    bitmap.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
-//                }
-//                return ms.ToArray();
-//            }
-//        }
 //    }
 //}
+
+
 
 using System;
 using System.Collections.Generic;
@@ -112,6 +143,7 @@ using System.Threading;
 using System.Windows.Forms;
 using OpenCvSharp;
 using System.Linq;
+using System.Text;
 
 namespace RCWS_Client
 {
@@ -119,16 +151,14 @@ namespace RCWS_Client
     {
         private const int Port = define.UDPPORT;
         private const string ServerIP = define.SERVER_IP;
-        //private const int Port = 5001;
 
         private UdpClient _udpClient;
         private IPEndPoint _remoteEndPoint;
 
-        public Video(UdpClient udpClient,IPEndPoint endPoint)
+        public Video(UdpClient udpClient, IPEndPoint endPoint)
         {
             InitializeComponent();
 
-            //_udpClient = new UdpClient(Port);
             _udpClient = udpClient;
             _remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
 
@@ -140,40 +170,157 @@ namespace RCWS_Client
             receiveAndDisplayThread.Start();
         }
 
+        //private void ReceiveAndDisplay()
+        //{
+        //    while (true)
+        //    {
+        //        try
+        //        {
+        //            Mat image = ReceiveImage();
+
+        //            if (image != null && !image.Empty())
+        //            {
+        //                pictureBox_Display.Image = OpenCvSharp.Extensions.BitmapConverter.ToBitmap(image);
+        //            }
+        //            else
+        //            {
+        //                Console.WriteLine("Image ERROR while <ReceiveImage>");
+        //            }
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            Console.WriteLine("Server Error: " + ex.Message);
+        //        }
+        //    }
+        //}
+
+        //private Mat ReceiveImage()
+        //{
+        //    const int SendBufSize = 40960;
+        //    const int SplitImg = 4;
+        //    const int BufSize = SendBufSize * SplitImg;
+
+        //    /*Image 수신 변수*/
+        //    Dictionary<int, byte[]> imageParts = new Dictionary<int, byte[]>();
+        //    int partsReceived = 0; // 받은 이미지 수
+
+        //    while (partsReceived < SplitImg)
+        //    {
+        //        /*데이터 수신*/
+        //        byte[] receiveData = _udpClient.Receive(ref _remoteEndPoint);
+
+        //        int partIndex = receiveData[0] - 0x30;
+        //        byte[] partData = receiveData.Skip(1).ToArray();
+
+        //        if (!imageParts.ContainsKey(partIndex))
+        //        {
+        //            imageParts[partIndex] = partData;
+        //            partsReceived++;
+
+        //            byte[] ack = Encoding.ASCII.GetBytes(((char)(partIndex + 0x30)).ToString());
+        //            _udpClient.Send(ack, ack.Length, _remoteEndPoint);
+        //        }
+        //    }
+
+        //    int totalBytes = imageParts.Sum(part => part.Value.Length);
+        //    byte[] mergedImageData = new byte[totalBytes];
+        //    int offset = 0;
+
+        //    for (int i = 0; i < imageParts.Count; i++)
+        //    {
+        //        byte[] part = imageParts[i];
+        //        Buffer.BlockCopy(part, 0, mergedImageData, offset, part.Length);
+        //        offset += part.Length;
+        //    }
+
+        //    Mat image = Cv2.ImDecode(mergedImageData, ImreadModes.Color);
+        //    if (image == null || image.Empty())
+        //    {
+        //        Console.WriteLine("Image ERROR");
+        //        return null;
+        //    }
+        //    return image;
+        //}
+        //private void ReceiveAndDisplay()
+        //{
+        //    while (true)
+        //    {
+        //        try
+        //        {
+        //            Mat image = ReceiveImage();
+
+        //            if (image != null && !image.Empty())
+        //            {
+        //                pictureBox_Display.Image = OpenCvSharp.Extensions.BitmapConverter.ToBitmap(image);
+        //            }
+        //            else
+        //            {
+        //                Console.WriteLine("Image ERROR while <ReceiveImage>");
+        //            }
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            Console.WriteLine("Server Error: " + ex.Message);
+        //        }
+        //    }
+        //}
+
+        //private Mat ReceiveImage()
+        //{
+        //    const int SendBufSize = 40960;
+        //    const int SplitImg = 4;
+        //    const int BufSize = SendBufSize * SplitImg;
+
+        //    byte[] buffer = new byte[BufSize];
+        //    IPEndPoint remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
+
+        //    for (int i = 0; i < SplitImg; i++)
+        //    {
+        //        byte[] recvBuffer = new byte[SendBufSize];
+        //        int ret = _udpClient.Client.ReceiveFrom(recvBuffer, SocketFlags.None, ref remoteEndPoint);
+
+        //        if (ret < 0)
+        //        {
+        //            throw new Exception("recvfrom failed");
+        //            i--;
+        //        }
+
+        //        Array.Copy(recvBuffer, 0, buffer, i * SendBufSize, SendBufSize);
+
+        //        char ack = (char)(i + 0x30);
+        //        byte[] ackBytes = new byte[] { (byte)ack };
+        //        _udpClient.Client.SendTo(ackBytes, SocketFlags.None, remoteEndPoint);
+        //    }
+
+        //    Mat image = Cv2.ImDecode(buffer, ImreadModes.Color);
+
+        //    if (image == null || image.Empty())
+        //    {
+        //        Console.WriteLine("Image ERROR");
+        //        return null;
+        //    }
+
+        //    return image;
+        //}
+
+
+        // ======================================
         private void ReceiveAndDisplay()
         {
             while (true)
             {
                 try
                 {
-                    List<byte[]> imageParts = new List<byte[]>();
-                    int partsReceived = 0;
+                    Mat image = ReceiveImage();
 
-                    while (partsReceived < 4)
+                    if (image != null && !image.Empty())
                     {
-                        byte[] imageData = _udpClient.Receive(ref _remoteEndPoint);
-
-                        byte ack = (byte)(partsReceived + 0x30);
-                        _udpClient.Send(new byte[] { ack }, 1, _remoteEndPoint);
-
-                        imageParts.Add(imageData);
-                        partsReceived++;
+                        pictureBox_Display.Image = OpenCvSharp.Extensions.BitmapConverter.ToBitmap(image);
                     }
-
-                    int totalBytes = imageParts.Sum(part => part.Length);
-                    byte[] mergedImageData = new byte[totalBytes];
-                    int offset = 0;
-
-                    foreach (byte[] part in imageParts)
+                    else
                     {
-                        Buffer.BlockCopy(part, 0, mergedImageData, offset, part.Length);
-                        offset += part.Length;
+                        Console.WriteLine("Image ERROR while <ReceiveImage>");
                     }
-
-                    Mat rawData = new Mat(1, mergedImageData.Length, MatType.CV_8UC3, mergedImageData);
-                    var image = Cv2.ImDecode(rawData, ImreadModes.Color);
-
-                    pictureBox_Display.Image = OpenCvSharp.Extensions.BitmapConverter.ToBitmap(image);
                 }
                 catch (Exception ex)
                 {
@@ -181,5 +328,44 @@ namespace RCWS_Client
                 }
             }
         }
+
+        private Mat ReceiveImage()
+        {
+            const int SendBufSize = 40960;
+            const int SplitImg = 4;
+            const int BufSize = SendBufSize * SplitImg;
+
+            byte[] buffer = new byte[BufSize];
+            EndPoint remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
+
+            for (int i = 0; i < SplitImg; i++)
+            {
+                byte[] recvBuffer = new byte[SendBufSize];
+                int ret = _udpClient.Client.ReceiveFrom(recvBuffer, SocketFlags.None, ref remoteEndPoint);
+
+                if (ret < 0)
+                {
+                    throw new Exception("recvfrom failed");
+                    i--;
+                }
+
+                Array.Copy(recvBuffer, 0, buffer, i * SendBufSize, SendBufSize);
+
+                char ack = (char)(i + 0x30);
+                byte[] ackBytes = new byte[] { (byte)ack };
+                _udpClient.Client.SendTo(ackBytes, SocketFlags.None, remoteEndPoint);
+            }
+
+            Mat image = Cv2.ImDecode(buffer, ImreadModes.Color);
+
+            if (image == null || image.Empty())
+            {
+                Console.WriteLine("Image ERROR");
+                return null;
+            }
+
+            return image;
+        }
+
     }
 }
