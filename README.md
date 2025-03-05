@@ -13,3 +13,8 @@
 # 개발 목표 <!-- omit in toc -->
 
 ## 필요성
+
+## 시스템 구성
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/a3660e55-0d84-420e-b102-18864dc4fd21" align="center" width="32%">
+</p>
