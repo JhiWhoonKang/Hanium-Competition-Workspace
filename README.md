@@ -13,8 +13,19 @@
 # 개발 목표 <!-- omit in toc -->
 
 ## 필요성
-
+기존 RCWS의 제한적인 상황 인식 능력 보완 방안 제시
 ## 시스템 구성
+### 시스템 간략도
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/a3660e55-0d84-420e-b102-18864dc4fd21" align="center" width="32%">
+  <img src="https://github.com/user-attachments/assets/a3660e55-0d84-420e-b102-18864dc4fd21" align="center" width="100%">
+</p>
+
+### 전체 시스템 구성도
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/4a53856c-ae97-4e36-8e90-9c9066f005df" align="center" width="64%">
+</p>
+
+### 통신 회로
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/3880c3a5-dd78-4cac-9c62-067a7555c6d9" align="center" width="80%">
 </p>
