@@ -34,3 +34,39 @@
 > | 상훈명 | 수여기관 | 수상일자 | 수상내역 |
 > |------|------|------|------|
 > | **한이음 ICT 멘토링 공모전** | **과학기술정보통신부** | **2023-12-07** | **과학기술정보통신부장관상(금상)** |
+
+## 🔸 참여자
+<table>
+  <tr>
+    <td align="center">
+      <a href="https://github.com/JhiWhoonKang">
+        <img src="" width="110px;" alt=""/><br />
+        <sub><b>강지훈</b></sub></a><br />
+        <sub>GUI 개발, 회로 제작</sub>
+    </td>
+    <td align="center">
+      <a href="https://github.com/rhrudfbs">
+        <img src="" width="110px;" alt=""/><br />
+        <sub><b>고경륜</b></sub></a><br />
+        <sub>모터 제어, 회로 제작</sub>
+    </td>
+    <td align="center">
+      <a href="">
+        <img src="" width="110px;" alt=""/><br />
+        <sub><b>문시현</b></sub></a><br/>
+        <sub>하드웨어 설계 및 제작, 영상처리 알고리즘 개발</sub>
+    </td>
+    <td align="center">
+      <a href="">
+        <img src="" width="110px;" alt=""/><br />
+        <sub><b>박성</b></sub></a><br />
+        <sub>초병 보조 장비 설계 및 제작</sub>
+    </td>
+    <td align="center">
+      <a href="https://github.com/Jeoungji">
+        <img src="" width="110px;" alt=""/><br />
+        <sub><b>정지우</b></sub></a><br />
+        <sub>메인 PC S/W 개발, 회로 제작</sub>
+    </td>
+  </tr>
+</table>
