@@ -6,8 +6,12 @@
 <p align="right"> 정지우(팀장), 강지훈 고경륜 문시현 박성(팀원)</p>
 
 <p align="center">
+  <img src="https://github.com/user-attachments/assets/919c9cbb-0829-4752-b069-8721a69db8e8" align="center" width="44%">
+</p>
+
+<p align="center">
   <img src="https://github.com/user-attachments/assets/5d76136e-b3f7-4416-845c-74334ab78d6a" align="center" width="32%">
-  <img src="https://github.com/user-attachments/assets/f4dcf910-8e1e-43a6-be8f-53e1a3693c9e" align="center" width="44%">
+  <img src="https://github.com/user-attachments/assets/f4dcf910-8e1e-43a6-be8f-53e1a3693c9e" align="center" width="44%">  
 </p>
 
 # 개발 목표 <!-- omit in toc -->
@@ -30,7 +34,19 @@
   <img src="https://github.com/user-attachments/assets/3880c3a5-dd78-4cac-9c62-067a7555c6d9" align="center" width="80%">
 </p>
 
-## 수상 내역
+## 개발 결과
+### 최종 사진
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/15e7b265-61b5-4aec-a21b-f882b217c625" align="center" width="40%">
+  <img src="https://github.com/user-attachments/assets/ba509acb-84b8-4175-88de-67cf323a60fd" align="center" width="40%">
+</p>
+
+### 동작 관련 영상
+[중간 평가 단계](https://www.youtube.com/watch?v=9MYGVtSU8yA)
+
+[레이저 트래킹 동작 영상](https://youtu.be/qs2KawkM66A)
+
+### 수상 내역
 > | 상훈명 | 수여기관 | 수상일자 | 수상내역 |
 > |------|------|------|------|
 > | **한이음 ICT 멘토링 공모전** | **과학기술정보통신부** | **2023-12-07** | **과학기술정보통신부장관상(금상)** |
